@@ -1,0 +1,255 @@
+Program.Sub.ScreenSU.Start
+gui.Form1..create
+gui.Form1..caption("Export")
+gui.Form1..size(4290,2115)
+gui.Form1..minx(0)
+gui.Form1..miny(0)
+gui.Form1..position(0,0)
+gui.Form1..event(unload,form1_unload)
+gui.Form1..alwaysontop(False)
+gui.Form1..fontname("Arial")
+gui.Form1..fontsize(8)
+gui.Form1..forecolor(0)
+gui.Form1..fontstyle(,,,,)
+gui.Form1..BackColor(-2147483633)
+gui.Form1..controlbox(True)
+gui.Form1..maxbutton(False)
+gui.Form1..minbutton(False)
+gui.Form1..mousepointer(0)
+gui.Form1..moveable(True)
+gui.Form1..sizeable(False)
+gui.Form1..ShowInTaskBar(True)
+gui.Form1..titlebar(True)
+gui.Form1.lblBegDate.create(label,"Beginning Date",True,1935,255,1,200,200,True,0,Arial,8,-2147483633,0)
+gui.Form1.lblBegDate.defaultvalue("")
+gui.Form1.lblBegDate.controlgroup(0)
+gui.Form1.lblEndingDate.create(label,"Ending Date",True,1935,255,1,2300,200,True,0,Arial,8,-2147483633,0)
+gui.Form1.lblEndingDate.defaultvalue("")
+gui.Form1.lblEndingDate.controlgroup(0)
+gui.Form1.dpbegdate.create(datepicker)
+gui.Form1.dpbegdate.visible(True)
+gui.Form1.dpbegdate.size(1545,330)
+gui.Form1.dpbegdate.zorder(0)
+gui.Form1.dpbegdate.position(200,500)
+gui.Form1.dpbegdate.enabled(True)
+gui.Form1.dpbegdate.checkbox(False)
+gui.Form1.dpbegdate.defaultvalue("")
+gui.Form1.dpbegdate.controlgroup(0)
+gui.Form1.dpenddate.create(datepicker)
+gui.Form1.dpenddate.visible(True)
+gui.Form1.dpenddate.size(1535,330)
+gui.Form1.dpenddate.zorder(0)
+gui.Form1.dpenddate.position(2300,500)
+gui.Form1.dpenddate.enabled(True)
+gui.Form1.dpenddate.checkbox(False)
+gui.Form1.dpenddate.defaultvalue("")
+gui.Form1.dpenddate.controlgroup(0)
+gui.Form1.cmdExport.create(button)
+gui.Form1.cmdExport.caption("Export")
+gui.Form1.cmdExport.visible(True)
+gui.Form1.cmdExport.size(855,375)
+gui.Form1.cmdExport.zorder(0)
+gui.Form1.cmdExport.position(200,1000)
+gui.Form1.cmdExport.enabled(True)
+gui.Form1.cmdExport.fontname("Arial")
+gui.Form1.cmdExport.fontsize(8)
+gui.Form1.cmdExport.event(click,cmdexport_click)
+gui.Form1.cmdExport.defaultvalue("")
+gui.Form1.cmdExport.controlgroup(0)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Variable.UDT.uExport.Define("EMPREF",String,EMPREF)
+Variable.UDT.uExport.Define("DATE_IN",String,DATE_IN)
+Variable.UDT.uExport.Define("TIME_IN",String,TIME_IN)
+Variable.UDT.uExport.Define("DATE_OUT",String,DATE_OUT)
+Variable.UDT.uExport.Define("TIME_OUT",String,TIME_OUT)
+Variable.uGlobal.uExport.Declare("uExport")
+Variable.UDT.uExportFinal.Define("EMPREF",String,EMPREF)
+Variable.UDT.uExportFinal.Define("CLKDT",Date,CLKDT)
+Variable.UDT.uExportFinal.Define("TERMNO",Long,TERMNO)
+Variable.uGlobal.uExportFinal.Declare("uExportFinal")
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+'This is a custom GAB script that will allow the user to export the employee number and clock in/out data. Data will be exported to a GSSCLK table
+'coded by: WAW
+'Date: 1/8/16
+
+'open connection
+F.odbc.Connection!con.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+
+'display the form
+Gui.Form1..Visible(true)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3520_Custom_Export.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form1_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.Main.End
+
+program.sub.form1_unload.start
+F.Intrinsic.Control.SetErrorHandler("form1_unload_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+'close the form
+Gui.Form1..Visible(false)
+
+'close connection to the database
+F.ODBC.Connection!con.Close
+
+F.Intrinsic.Control.End
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("form1_unload_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3520_Custom_Export.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End
+Function.Intrinsic.Control.EndIf
+
+
+program.sub.form1_unload.end
+
+program.sub.cmdexport_click.start
+F.Intrinsic.Control.SetErrorHandler("cmdexport_click_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+V.Local.ssql.Declare(String)
+V.Local.sbegdate.Declare(String)
+V.Local.senddate.Declare(String)
+V.Local.sempref.Declare(String)
+V.Local.ltermo.Declare(Long)
+V.Local.i.Declare(Long)
+V.Local.i2.Declare(Long)
+V.Local.dindate.Declare(Date)
+V.Local.doutdate.Declare(Date)
+V.Local.ssampledate.Declare(String)
+V.Local.dintime.Declare(Date)
+V.Local.douttime.declare(Date)
+V.Local.icalc.Declare(Long)
+V.Local.iload.Declare(Long)
+V.Local.dindatefinal.Declare(Date)
+V.Local.doutdatefinal.Declare(Date)
+V.Local.ssql2.Declare(String)
+
+V.Local.ltermo.Set(700)
+
+'set the bal as date
+V.Local.ssampledate.Set("1900-01-01")
+
+Gui.Form1..Visible(false)
+
+'set local variables as the dates selected
+V.Local.sbegdate.Set(V.Screen.Form1!dpbegdate.Value)
+V.Local.senddate.Set(V.Screen.Form1!dpenddate.Value)
+'
+
+'get the employee and dates from time attendance
+F.Intrinsic.String.Build(" Select EMPLOYEE as EMPREF, DATE_IN, TIME_IN, DATE_OUT, TIME_OUT  from V_TIME_ATTENDANCE where CHARGE_DATE between '{0}' and '{1}' and ABSENCE_DESC <> '{2}' and BAL_AS_DATE <> '{3}'",V.Local.sbegdate.PervasiveDate,V.Local.senddate.PervasiveDate,"Transferred",V.local.ssampledate.pervasivedate,V.Local.ssql)
+F.ODBC.Connection!con.OpenRecordsetRO("rst",V.local.ssql)
+'check to see if eof is false
+F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,=,False)
+	'load the export udt
+	F.intrinsic.variable.LoadUDTFromRecordset("con","rst","v.uglobal.uExport",False,0)
+F.Intrinsic.Control.Else
+	'otherwise inform the user there is no data to export and close the program
+	F.Intrinsic.UI.Msgbox("There is no data to export")
+	F.Intrinsic.Control.CallSub(Form1_unload)
+F.Intrinsic.Control.EndIf
+
+V.Local.icalc.Set(V.uGlobal.uExport.UBound)
+F.Intrinsic.Debug.Stop
+
+'F.Intrinsic.Math.Add(V.Local.icalc,1,V.Local.icalc)
+
+F.Intrinsic.math.Mult(V.Local.icalc,2,V.Local.icalc)
+F.Intrinsic.Math.Add(V.Local.icalc,1,V.Local.icalc)
+
+V.uGlobal.uExportFinal.Redim(0,V.Local.icalc)
+
+'loop through the first export udt and begin building the final
+F.intrinsic.Control.For(V.Local.i,V.uGlobal.uExportfinal.LBound,V.uGlobal.uExportfinal.UBound,1)
+
+	'combine date in and time in
+	V.local.dindate.set(V.uGlobal.uExport(v.Local.i2)!DATE_IN)
+	V.Local.dintime.Set(V.uGlobal.uExport(V.Local.i2)!TIME_IN)
+	F.Intrinsic.Date.CombineDateTime(V.Local.dindate,V.Local.dintime,V.Local.dindatefinal)
+	'combine date out and time out
+	V.Local.doutdate.Set(V.uGlobal.uExport(V.Local.i2)!DATE_OUT)
+	V.Local.douttime.Set(V.uGlobal.uExport(V.Local.i2)!TIME_OUT)
+	F.Intrinsic.Date.CombineDateTime(V.Local.doutdate,V.Local.douttime,V.Local.doutdatefinal)
+	'set exportfinal udt fields 1 for in and 1 for out
+	V.uGlobal.uExportFinal(v.Local.i)!EMPREF.Set(V.uGlobal.uExport(v.Local.i2)!EMPREF)
+	V.uGlobal.uExportFinal(v.Local.i)!CLKDT.Set(V.Local.dindatefinal)
+	V.uGlobal.uExportFinal(v.Local.i)!TERMNO.Set(V.Local.ltermo)
+
+	F.Intrinsic.Math.Add(V.Local.i,1,V.Local.i)
+
+	V.uglobal.uexportfinal(v.local.i)!EMPREF.set(V.uglobal.uexport(v.local.i2)!EMPREF)
+	V.uGlobal.uExportFinal(v.Local.i)!CLKDT.Set(V.Local.doutdatefinal)
+	V.uGlobal.uExportFinal(v.Local.i)!TERMNO.Set(V.Local.ltermo)
+	F.Intrinsic.Math.Add(V.Local.i2,1,V.Local.i2)
+		
+F.Intrinsic.Control.Next(V.Local.i)
+
+'open connection
+F.odbc.Connection!conx.OpenConnection("Server=CAR-SQLSHARE;Database=tamsdat; User Id =GSSUser; Password =CaraghCl0ck")
+
+'loop through the UDT and upload the tables
+F.Intrinsic.Control.For(V.Local.iload,V.uGlobal.uExportFinal.LBound,V.uglobal.uExportFinal.UBound,1)
+	'read/write from their GSSCLK table and add the data
+	F.Intrinsic.String.Build("Select * from {0}","GSSCLK",V.Local.ssql2)
+	F.ODBC.Connection!conx.OpenRecordsetRW("rstExport",V.Local.ssql2)
+	F.ODBC.conx!rstExport.AddNew
+	F.ODBC.conx!rstExport.Set!EMPREF(V.uGlobal.uExportFinal(v.Local.iload)!EMPREF)
+	F.ODBC.conx!rstExport.Set!CLKDT(V.uGlobal.uExportFinal(v.Local.iload)!CLKDT)
+	F.ODBC.conx!rstExport.Set!TERMNO(V.uGlobal.uExportFinal(v.Local.iload)!TERMNO)
+	F.ODBC.conx!rstExport.Update
+
+	F.ODBC.conx!rstExport.Close
+F.Intrinsic.Control.Next(V.Local.iload)
+
+'close connection to their database	
+F.ODBC.Connection!conx.Close
+
+'inform the user the upload is complete
+F.Intrinsic.UI.Msgbox("Export Complete")
+
+'call the unload subroutine
+F.Intrinsic.Control.CallSub(Form1_unload)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmdexport_click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3520_Custom_Export.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form1_unload)
+Function.Intrinsic.Control.EndIf
+
+
+program.sub.cmdexport_click.end
+
+Program.Sub.Comments.Start
+${$0$}$GCG_3520_Custom_Export$}$WAW$}$1/8/2016
+Program.Sub.Comments.End
+
